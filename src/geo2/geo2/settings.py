@@ -27,6 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
+GEO_DEFAULT_IP = '72.14.207.99'
+LOGOUT_REDIRECT_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
 
 # Application definition
 
@@ -37,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'analytics',
+    'account',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +61,7 @@ ROOT_URLCONF = 'geo2.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
