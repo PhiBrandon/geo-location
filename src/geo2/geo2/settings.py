@@ -28,6 +28,10 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
+
+YELP_CLIENT_ID      = 'wTxayqB2UpQGMRoEsttGVg' #IF USING HEROKU [os.environ.get('YELP_CLIENT_ID')]
+YEL_CLIENT_SECRET   = '4c0n4bE8HvHBqmwuXmx1sYY2VaMq8RuSMwCFlYk8Qn3i6aHar6O28USiL6vw8HnS' #IF USING HEROKU [os.environ.get('YELP_CLIENT_SECRET')]
+
 GEO_DEFAULT_IP = '72.14.207.99'
 LOGOUT_REDIRECT_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -44,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'analytics',
     'account',
+    'search'
 ]
 
 MIDDLEWARE = [
