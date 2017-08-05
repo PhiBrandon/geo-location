@@ -1,11 +1,132 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Search</h1>
 
-{% for b in results %}
 <div class="row">
-{{b.name}}
+	<div class="col s4 m4 l4">
+	<h3>Search</h3>
+{% for b in results.businesses %}
+<div class="row" id="no-margin">
+	<a href="#" class="biz-item" data-name='{{b.name}}' data-address='{{b.location.display_address.0}} {{b.location.display_address.1}}' data-lat='{{b.coordinates.latitude}}' data-lng='{{b.coordinates.longitude}}'>{{b.name}}, {{b.location.city}}</a>
 </div>
 {% endfor %}
+	</div>
 
+	<div class="col s8 m8 l8">
+	<h3>My Google Maps Demo<small><a  href="/search/?q={{request.GET.q}}" style="display:none" id='search-here'>Search Here?</a></small></h3>
+    	<div id="map"></div>
+    </div>
+
+</div>
+
+	{% endblock %}
+
+	{% block script %}
+
+ <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqbmUWgFXunZdCrhD6shjmR0me1rmO984&callback=initMap"
+  type="text/javascript"></script>
+
+    <script>
+    var locations = [
+   {% for b in results.businesses %}
+   		{
+   			lat: {{b.coordinates.latitude}}, 
+    		lng: {{b.coordinates.longitude}}, 
+    		name: '{{b.name}}',
+    		address: '{{b.location.display_address.0}} {{b.location.display_address.1}}'
+   		},
+   {% endfor %}
+] //Use an ajax request
+    var map;
+    var markers = [];
+    var infoWindow;
+      function initMap() {
+        var uluru = {lat: {{results.businesses.0.coordinates.latitude}}, lng: {{results.businesses.0.coordinates.longitude}}};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: parseInt({{request.GET.zoom}}) || 12, //Goes from 0 to 18
+          center: uluru
+        });
+
+        var searchLink = $('#search-here')
+        var defaultSearchLink = searchLink.attr("href")
+        map.addListener('center_changed', function(){
+        	window.setTimeout(function(){
+
+
+        	var mLat = map.center.lat()
+        	var mLng = map.center.lng()
+        	getLocalName(mLat,mLng)
+        	searchLink.fadeIn()
+        	//searchLink.attr('href', defaultSearchLink + "&loc=" + mLat + "+" + mLng)
+        	
+        }, 1000)
+        })
+
+        function getLocalName(lat, lng){
+        	var geocoder = new google.maps.Geocoder()
+        	var location = new google.maps.LatLng(lat, lng)
+        	geocoder.geocode({'latLng': location}, function(results, status){
+        		if(status == google.maps.GeocoderStatus.OK){
+        			if(results[2].address_components[1]){
+        				var res = results
+        				var longName = results[2].address_components[1].long_name
+        				console.log(longName)
+        				searchLink.attr('href', defaultSearchLink + "&loc=" + longName + '&zoom=' + 6)
+        			}
+        			
+        		}
+        	})
+        }
+
+        infoWindow = new google.maps.InfoWindow()
+        
+        function createMarker(latlng, name, address){
+        	var html ="<b>" + name + "</b><br/>" + address
+        	var marker = new google.maps.Marker({
+          		position: latlng,
+          		map: map
+        	});
+        	google.maps.event.addListener(marker, 'click', function(){
+        		infoWindow.setContent(html)
+        		infoWindow.open(map,marker)
+        	})
+        	return marker
+        }
+
+        if(locations.length > 0) {
+        	for(var i = 0; i < locations.length; i++){
+        		var obj = locations[i]
+        		var latlang = {lat:obj.lat, lng:obj.lng}
+        		var name = obj.name
+        		var address = obj.address
+        		var marker = createMarker(latlang, name, address)
+        		markers.push(marker)
+        	}
+        }
+
+        function clearLocations(){
+        	infoWindow.close()
+        	for(var i = 0; i < markers.length; i++){
+        		markers[i].setMap(null)
+        	}
+        	markers.length = 0
+        }
+
+        $('.biz-item').click(function(e){
+        	e.preventDefault()
+        	var locData = $(this)
+        	console.log(locData)
+        	var name = locData.attr("data-name")
+        	var address = locData.attr("data-address")
+        	var lat = parseFloat(locData.attr("data-lat"))
+        	var lng = parseFloat(locData.attr("data-lng"))
+        	var latlng = {lat: lat, lng: lng}
+        	//clearLocations()
+        	var marker = createMarker(latlng, name, address)
+        	markers.push(marker)
+        	google.maps.event.trigger(marker, 'click')
+        	map.setCenter()
+        	map.setZoom(16)
+        })
+      }
+    </script>
 {% endblock %}

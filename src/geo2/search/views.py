@@ -15,5 +15,4 @@ class SearchView(View):
 		if q:
 			items = yelp_search(keyword=q, location=location, request=request)
 			businesses = items['businesses']
-			print(businesses[0])
-		return render(request, 'search/home.html', {'results': items['businesses']})
+		return render(request, 'search/home.html', {'results': items})
